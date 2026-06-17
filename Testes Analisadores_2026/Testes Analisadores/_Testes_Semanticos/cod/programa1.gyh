@@ -1,0 +1,10 @@
+#Programa nao tem erro semantico
+
+:DEC
+parametro:INT
+fatorial:INT
+
+:PROG 
+LER= fatorial
+IMPRIMIR parametro
+IMPRIMIR "Oi"
