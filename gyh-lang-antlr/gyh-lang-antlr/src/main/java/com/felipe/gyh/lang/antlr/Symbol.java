@@ -8,6 +8,14 @@ public class Symbol {
     public static final int REAL = 0;
     public static final int INT = 1;
     
+    public String generateCode() {
+        if(type == INT) {
+            return "int " + name + ";";
+        } else {
+            return "double " + name + ";";
+        }
+    }
+    
     public Symbol(String name, String type, String value){
         this.name = name;
         if (type.equals("INT")) this.type=INT;
@@ -43,5 +51,4 @@ public class Symbol {
     public String toString() {
         return "Symbol [name=" + this.name + ", type=" + type + ", value=" + value + "]";
     }
-    
 }

@@ -4,6 +4,7 @@ grammar GyhGrammar;
     import java.util.ArrayList;
     import com.felipe.gyh.lang.antlr.Symbol;
     import com.felipe.gyh.lang.antlr.SymbolTable;
+    import com.felipe.gyh.lang.antlr.GyhProgram;
 }
 
 @members{
@@ -45,7 +46,17 @@ grammar GyhGrammar;
 }
 
 // Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos;
-programa: Delim PCDec listaDeclaracoes Delim PCProg listaComandos;
+programa: ':' 'DEC' listaDeclaracoes ':' 'PROG' listaComandos 
+          { 
+            // try/catch adicionado para capturar o "throws Exception" do generateTarget()
+            try {
+                GyhProgram program = new GyhProgram(SymbolTable);
+                program.generateTarget();
+            } catch(Exception e) {
+                System.out.println("Erro ao salvar o arquivo C: " + e.getMessage());
+            }
+          } 
+        ;
 
 // ListaDeclaracoes → Declaracao ListaDeclaracoes | Declaracao;
 listaDeclaracoes: declaracao listaDeclaracoes | declaracao;

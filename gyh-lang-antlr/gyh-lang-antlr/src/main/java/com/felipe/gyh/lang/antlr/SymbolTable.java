@@ -1,5 +1,6 @@
 package com.felipe.gyh.lang.antlr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SymbolTable {
@@ -14,7 +15,7 @@ public class SymbolTable {
     }
 
     public boolean exists(String name) {
-        return table.get(name)!=null;
+        return table.get(name) != null;
     }
 
     public Symbol get(String symbolName) {
@@ -25,5 +26,9 @@ public class SymbolTable {
         Symbol sym = get(name);
         if (sym != null) return sym.getType();
         return -1;
+    }
+    
+    public ArrayList<Symbol> getAll() {
+        return new ArrayList<Symbol>(table.values());
     }
 }
