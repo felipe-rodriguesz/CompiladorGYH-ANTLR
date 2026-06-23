@@ -8,12 +8,15 @@ grammar GyhGrammar;
     import com.felipe.gyh.lang.antlr.Command;        
     import com.felipe.gyh.lang.antlr.CommandEscrita; 
     import com.felipe.gyh.lang.antlr.CommandLeitura;
+    import com.felipe.gyh.lang.antlr.CommandAtribuicao;
 }
 
 @members{
     private SymbolTable SymbolTable = new SymbolTable();
     private String _writeVar; 
     private String _readVar; 
+    private String _expVar;
+    private String _expContent;
     private ArrayList<Command> listCmd = new ArrayList<Command>();
 
     public void verificaEDeclaraVariavel(String name, String type) {
@@ -111,13 +114,19 @@ listaComandos: comando listaComandos | comando;
 comando: comandoAtribuicao | comandoEntrada | comandoSaida | comandoCondicao | comandoRepeticao | subAlgoritmo;
 
 // ComandoAtribuicao → VARIAVEL ':=' ExpressaoAritmetica;
-comandoAtribuicao
-@init{ String varName = ""; }
-    : Var { 
-        varName = _input.LT(-1).getText();
-        verificaUsoVariavel(varName); 
+comandoAtribuicao: Var { 
+        _expVar = _input.LT(-1).getText();
+        verificaUsoVariavel(_expVar); 
       } 
-      Atrib e=expressaoAritmetica { verificaTipoAtribuicao(varName, $e.tipo); } 
+      Atrib e=expressaoAritmetica 
+      { 
+        verificaTipoAtribuicao(_expVar, $e.tipo); 
+        
+        _expContent = $expressaoAritmetica.text; 
+        
+        CommandAtribuicao cmd = new CommandAtribuicao(_expVar, _expContent);
+        listCmd.add(cmd);
+      } 
     ;
 
 // ComandoEntrada → 'LER' VARIAVEL;
