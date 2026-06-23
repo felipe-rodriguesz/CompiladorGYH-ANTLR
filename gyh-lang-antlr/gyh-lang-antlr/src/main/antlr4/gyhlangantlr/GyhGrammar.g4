@@ -5,10 +5,16 @@ grammar GyhGrammar;
     import com.felipe.gyh.lang.antlr.Symbol;
     import com.felipe.gyh.lang.antlr.SymbolTable;
     import com.felipe.gyh.lang.antlr.GyhProgram;
+    import com.felipe.gyh.lang.antlr.Command;        
+    import com.felipe.gyh.lang.antlr.CommandEscrita; 
+    import com.felipe.gyh.lang.antlr.CommandLeitura;
 }
 
 @members{
     private SymbolTable SymbolTable = new SymbolTable();
+    private String _writeVar; 
+    private String _readVar; 
+    private ArrayList<Command> listCmd = new ArrayList<Command>();
 
     public void verificaEDeclaraVariavel(String name, String type) {
         Symbol sym = new Symbol(name, type, null);
@@ -48,13 +54,8 @@ grammar GyhGrammar;
 // Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos;
 programa: ':' 'DEC' listaDeclaracoes ':' 'PROG' listaComandos 
           { 
-            // try/catch adicionado para capturar o "throws Exception" do generateTarget()
-            try {
-                GyhProgram program = new GyhProgram(SymbolTable);
-                program.generateTarget();
-            } catch(Exception e) {
-                System.out.println("Erro ao salvar o arquivo C: " + e.getMessage());
-            }
+            GyhProgram program = new GyhProgram(SymbolTable, listCmd);
+            program.generateTarget();
           } 
         ;
 
@@ -120,10 +121,22 @@ comandoAtribuicao
     ;
 
 // ComandoEntrada → 'LER' VARIAVEL;
-comandoEntrada: PCLer Var { verificaUsoVariavel(_input.LT(-1).getText()); } ;
+comandoEntrada: PCLer Var 
+                    { verificaUsoVariavel(_input.LT(-1).getText()); 
+                      _readVar = _input.LT(-1).getText();
+                      CommandLeitura cmd = new CommandLeitura(_readVar);
+                      listCmd.add(cmd);
+                    } 
+              ;
 
 // ComandoSaida → 'IMPRIMIR'  VARIAVEL | 'IMPRIMIR' CADEIA;
-comandoSaida: PCImprimir Var { verificaUsoVariavel(_input.LT(-1).getText()); } | PCImprimir Cadeia;
+comandoSaida: PCImprimir Var 
+                        { verificaUsoVariavel(_input.LT(-1).getText()); 
+                        _writeVar=_input.LT(-1).getText();
+                        CommandEscrita cmd = new CommandEscrita(_writeVar);
+                        listCmd.add(cmd);
+                        }
+             | PCImprimir Cadeia;
 
 // ComandoCondicao → 'SE' ExpressaoRelacional 'ENTAO' Comando | 'SE' ExpressaoRelacional 'ENTAO' Comando 'SENAO' Comando;
 comandoCondicao: PCSe expressaoRelacional PCEntao comando (PCSenao comando)?;

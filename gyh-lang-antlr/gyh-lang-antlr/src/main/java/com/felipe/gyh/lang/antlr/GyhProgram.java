@@ -3,13 +3,15 @@ package com.felipe.gyh.lang.antlr;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class GyhProgram {
     private SymbolTable varTable;
+    private ArrayList<Command> command;
 
-    // O construtor agora recebe a tabela de símbolos populada pelo ANTLR
-    public GyhProgram(SymbolTable varTable) {
+    public GyhProgram(SymbolTable varTable, ArrayList<Command> command) {
         this.varTable = varTable;
+        this.command = command;
     }
     
     public void generateTarget() {
@@ -25,6 +27,14 @@ public class GyhProgram {
             }
         }
         
+        str.append("\n");
+        
+        if (command != null) {
+            for(Command cmd: command) {
+                str.append("\t").append(cmd.generateCode()).append("\n");
+            }
+        }
+        
         str.append("}\n");
         
         try {
@@ -33,17 +43,14 @@ public class GyhProgram {
             }
         }
         catch(IOException ex) {
-
+            System.out.println("Erro ao salvar arquivo: " + ex.getMessage());
         }
         
         System.out.println(str.toString()); 
     }
 
-    public SymbolTable getVarTable() {
-        return varTable;
-    }
-
-    public void setVarTable(SymbolTable varTable) {
-        this.varTable = varTable;
-    }
+    public SymbolTable getVarTable() { return varTable; }
+    public void setVarTable(SymbolTable varTable) { this.varTable = varTable; }
+    public ArrayList<Command> getCommand() { return command; }
+    public void setCommand(ArrayList<Command> command) { this.command = command; }
 }

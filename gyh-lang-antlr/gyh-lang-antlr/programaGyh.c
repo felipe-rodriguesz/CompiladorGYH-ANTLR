@@ -4,4 +4,7 @@
 void main() { 
 	int fatorial;
 	int parametro;
+
+	scanf("%d", &parametro);
+	printf("%d", fatorial);
 }
