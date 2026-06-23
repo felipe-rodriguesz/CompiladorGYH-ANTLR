@@ -9,6 +9,8 @@ grammar GyhGrammar;
     import com.felipe.gyh.lang.antlr.CommandEscrita; 
     import com.felipe.gyh.lang.antlr.CommandLeitura;
     import com.felipe.gyh.lang.antlr.CommandAtribuicao;
+    import com.felipe.gyh.lang.antlr.CommandCondicao;
+    import com.felipe.gyh.lang.antlr.CommandRepeticao;
 }
 
 @members{
@@ -17,7 +19,12 @@ grammar GyhGrammar;
     private String _readVar; 
     private String _expVar;
     private String _expContent;
+    private String cond;
+
+    private ArrayList<Command> lt = new ArrayList<Command>();
+    private ArrayList<Command> lf = new ArrayList<Command>();
     private ArrayList<Command> listCmd = new ArrayList<Command>();
+    private ArrayList<Command> listAux = new ArrayList<Command>();
 
     public void verificaEDeclaraVariavel(String name, String type) {
         Symbol sym = new Symbol(name, type, null);
@@ -148,10 +155,53 @@ comandoSaida: PCImprimir Var
              | PCImprimir Cadeia;
 
 // ComandoCondicao → 'SE' ExpressaoRelacional 'ENTAO' Comando | 'SE' ExpressaoRelacional 'ENTAO' Comando 'SENAO' Comando;
-comandoCondicao: PCSe expressaoRelacional PCEntao comando (PCSenao comando)?;
+comandoCondicao: 
+    PCSe expressaoRelacional { cond = $expressaoRelacional.text; }
+    PCEntao 
+    {
+        listAux = new ArrayList<Command>(listCmd);
+        listCmd.clear();
+    }
+    comando 
+    {
+        lt = new ArrayList<Command>(listCmd);
+        listCmd.clear();
+    }
+    (PCSenao comando
+    {
+        lf = new ArrayList<Command>(listCmd);
+        listCmd.clear();
+    })?
+    {
+        CommandCondicao cmdCond = new CommandCondicao(cond, lt, lf);
+        
+        listCmd = listAux;
+        listCmd.add(cmdCond);
+    }
+;
 
 // ComandoRepeticao → 'ENQTO' ExpressaoRelacional Comando;
-comandoRepeticao: PCEnqto expressaoRelacional comando;
+comandoRepeticao: 
+    PCEnqto expressaoRelacional { cond = $expressaoRelacional.text; }
+    {
+        // 1. Salva o que já estava na lista principal do programa na listAux
+        listAux = new ArrayList<Command>(listCmd);
+        listCmd.clear(); // Limpa para capturar APENAS o comando (ou bloco) do ENQTO
+    }
+    comando
+    {
+        // 2. Transfere os comandos internos capturados para a nossa lista do laço
+        lt = new ArrayList<Command>(listCmd);
+        listCmd.clear();
+        
+        // 3. Cria o objeto do comando de repetição
+        CommandRepeticao cmdRep = new CommandRepeticao(cond, lt);
+        
+        // 4. Restaura a lista do programa principal e adiciona o bloco WHILE nela
+        listCmd = listAux;
+        listCmd.add(cmdRep);
+    }
+;
 
 // SubAlgoritmo → 'INI' ListaComandos 'FIM';
 subAlgoritmo: PCIni listaComandos PCFim;
