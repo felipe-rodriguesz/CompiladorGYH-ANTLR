@@ -14,7 +14,7 @@ grammar GyhGrammar;
 }
 
 @members{
-    private SymbolTable SymbolTable = new SymbolTable();
+    private SymbolTable symbolTable = new SymbolTable();
     private String _writeVar; 
     private String _readVar; 
     private String _expVar;
@@ -28,8 +28,8 @@ grammar GyhGrammar;
 
     public void verificaEDeclaraVariavel(String name, String type) {
         Symbol sym = new Symbol(name, type, null);
-        if(!SymbolTable.exists(name)){
-            SymbolTable.add(sym);
+        if(!symbolTable.exists(name)){
+            symbolTable.add(sym);
             System.out.println("Adicionei um simbolo " + sym);
         } else {
             System.out.println("Erro Semântico: Variável já declarada! -> " + name);
@@ -37,7 +37,7 @@ grammar GyhGrammar;
     }
 
     public void verificaUsoVariavel(String name) {
-        if(!SymbolTable.exists(name)) {
+        if(!symbolTable.exists(name)) {
             System.out.println("Erro Semântico: Variável não declarada! -> " + name);
         }
     }
@@ -52,7 +52,7 @@ grammar GyhGrammar;
 
     public void verificaTipoAtribuicao(String name, int tipoExpressao) {
         if (tipoExpressao == -1) return;
-        Symbol sym = SymbolTable.get(name);
+        Symbol sym = symbolTable.get(name);
         if (sym != null) {
             if (sym.getType() == Symbol.INT && tipoExpressao == Symbol.REAL) {
                 System.out.println("Erro Semântico: Incompatibilidade de tipos! Variável '" + name + "' é INT e não pode receber REAL.");
@@ -62,9 +62,9 @@ grammar GyhGrammar;
 }
 
 // Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos;
-programa: ':' 'DEC' listaDeclaracoes ':' 'PROG' listaComandos 
+programa: Delim PCDec listaDeclaracoes Delim PCProg listaComandos 
           { 
-            GyhProgram program = new GyhProgram(SymbolTable, listCmd);
+            GyhProgram program = new GyhProgram(symbolTable, listCmd);
             program.generateTarget();
           } 
         ;
@@ -98,7 +98,7 @@ fatorAritmetico returns [int tipo]
     | NumReal { $tipo = Symbol.REAL; }
     | Var { 
         verificaUsoVariavel(_input.LT(-1).getText()); 
-        $tipo = SymbolTable.getVariableType(_input.LT(-1).getText());
+        $tipo = symbolTable.getVariableType(_input.LT(-1).getText());
       } 
     | AbrePar e=expressaoAritmetica FechaPar { $tipo = $e.tipo; }
     ;
