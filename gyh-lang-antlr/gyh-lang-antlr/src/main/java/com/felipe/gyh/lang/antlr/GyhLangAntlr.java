@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 public class GyhLangAntlr {
     public static void main(String[] args) throws IOException {
 
-        CharStream cs = CharStreams.fromFileName("programa6.gyh");
+        CharStream cs = CharStreams.fromFileName("programa1.gyh");
         GyhGrammarLexer lexer = new GyhGrammarLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GyhGrammarParser parser = new GyhGrammarParser(tokens);
