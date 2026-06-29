@@ -14,7 +14,7 @@ grammar GyhGrammar;
 }
 
 @members{
-    private SymbolTable SymbolTable = new SymbolTable();
+    private SymbolTable symbolTable = new SymbolTable();
     private int errosSemanticos = 0;
     private String _writeVar; 
     private String _readVar; 
@@ -39,7 +39,7 @@ grammar GyhGrammar;
     }
 
     public void verificaUsoVariavel(String name) {
-        if(!SymbolTable.exists(name)) {
+        if(!symbolTable.exists(name)) {
             System.err.println("Erro Semântico: Variável não declarada! -> " + name);
             errosSemanticos++;
         }
@@ -72,7 +72,7 @@ programa: Delim PCDec listaDeclaracoes Delim PCProg listaComandos
             int errosSintaticosELexicos = getNumberOfSyntaxErrors();
 
             if (errosSintaticosELexicos == 0 && errosSemanticos == 0) {
-                GyhProgram program = new GyhProgram(SymbolTable, listCmd);
+                GyhProgram program = new GyhProgram(symbolTable, listCmd);
                 program.generateTarget();
                 System.out.println("\n[Sucesso] BUILD SUCCESS! Codigo C gerado.");
             } else {
