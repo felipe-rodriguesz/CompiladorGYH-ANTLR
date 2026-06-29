@@ -15,6 +15,7 @@ grammar GyhGrammar;
 
 @members{
     private SymbolTable SymbolTable = new SymbolTable();
+    private int errosSemanticos = 0;
     private String _writeVar; 
     private String _readVar; 
     private String _expVar;
@@ -32,13 +33,15 @@ grammar GyhGrammar;
             SymbolTable.add(sym);
             System.out.println("Adicionei um simbolo " + sym);
         } else {
-            System.out.println("Erro Semântico: Variável já declarada! -> " + name);
+            System.err.println("Erro Semântico: Variável já declarada! -> " + name);
+            errosSemanticos++;
         }
     }
 
     public void verificaUsoVariavel(String name) {
         if(!SymbolTable.exists(name)) {
-            System.out.println("Erro Semântico: Variável não declarada! -> " + name);
+            System.err.println("Erro Semântico: Variável não declarada! -> " + name);
+            errosSemanticos++;
         }
     }
 
@@ -55,7 +58,8 @@ grammar GyhGrammar;
         Symbol sym = SymbolTable.get(name);
         if (sym != null) {
             if (sym.getType() == Symbol.INT && tipoExpressao == Symbol.REAL) {
-                System.out.println("Erro Semântico: Incompatibilidade de tipos! Variável '" + name + "' é INT e não pode receber REAL.");
+                System.err.println("Erro Semantico: Incompatibilidade de tipos! Variavel '" + name + "' e INT e nao pode receber REAL.");
+                errosSemanticos++;
             }
         }
     }
@@ -64,8 +68,19 @@ grammar GyhGrammar;
 // Programa → ':' 'DEC' ListaDeclaracoes ':' 'PROG' ListaComandos;
 programa: ':' 'DEC' listaDeclaracoes ':' 'PROG' listaComandos 
           { 
-            GyhProgram program = new GyhProgram(SymbolTable, listCmd);
-            program.generateTarget();
+            // Vai buscar o total de erros sintáticos e léxicos detetados pelo ANTLR
+            int errosSintaticosELexicos = getNumberOfSyntaxErrors();
+
+            if (errosSintaticosELexicos == 0 && errosSemanticos == 0) {
+                GyhProgram program = new GyhProgram(SymbolTable, listCmd);
+                program.generateTarget();
+                System.out.println("\n[Sucesso] BUILD SUCCESS! Codigo C gerado.");
+            } else {
+                System.err.println("\n[Falha] Geracao de codigo abortada devido a erros no codigo GYH:");
+                System.err.println("-> Erros Sintaticos/Lexicos: " + errosSintaticosELexicos);
+                System.err.println("-> Erros Semanticos: " + errosSemanticos);
+                System.err.println("O arquivo 'programaGyh.c' NAO foi criado ou atualizado.");
+            }
           } 
         ;
 
