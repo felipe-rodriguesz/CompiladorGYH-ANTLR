@@ -1,0 +1,4 @@
+:DEC
+a:INT
+:PROG
+a := 10 @
